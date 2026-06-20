@@ -1,41 +1,60 @@
+# Forgejo Self-Hosted Git Server
 
-# run it
+Two deployment options: Docker Compose or Kubernetes (K3s).
 
-## DEV (local LAN)
+## Docker Compose
 
-<!-- docker compose --profile dev up -d -->
-<!-- docker compose -f compose.yml -f compose.dev.yml up -d -->
-docker compose -f compose.yml -f compose.dev.yml up -d --force-recreate
+```bash
+cd docker/
+cp .env.example .env
+cp traefik/traefik.yml.example traefik/traefik.yml
+cp traefik/dynamic.yml.example traefik/dynamic.yml
+# Edit all three files with your values
 
-## Prod
+# Dev (local)
+docker compose -f compose.yml -f compose.dev.yml up -d
 
-<!-- docker compose --profile prod up -d -->
+# Prod
 docker compose -f compose.yml -f compose.prod.yml up -d
+```
 
-## Azure ACME
+See [docker/docs/](docker/docs/) for detailed setup guides.
 
-1. get subscriptions : `az account list -o table`
-2. Get resource group : `az group list -o table`
-3. Find dns zone : `az network dns zone list -o table`
-4. final command to get address: `az network dns zone show --name <domain.com>  --resource-group <resource_group> --query id -o tsv`
-5. create the pricipal `az ad sp create-for-rbac --name traefik-acme --role "DNS Zone Contributor" --scopes /subscriptions/<sub-id>/resourceGroups/<rg>/providers/Microsoft.Network/dnszones/<domain>`
+## Kubernetes (K3s)
 
+Uses the same `.env` file as Docker. The setup script reads it and creates all K8s secrets, installs cert-manager, and deploys everything:
 
-    ```json
-        {
-        "appId": AZURE_CLIENT_ID ,
-        "displayName": "traefik-acme",
-        "password": AZURE_CLIENT_SECRET,
-        "tenant": AZURE_TENANT_ID
-        }
-    ```
+```bash
+# Make sure .env exists (in repo root or docker/)
+cd k8s/
+# Edit forgejo.yml and ingress.yml — replace git.yourdomain.com with your domain
+chmod +x setup.sh
+./setup.sh
+```
 
-6. update .env
+### Create admin user (first time)
 
-## install lazy docker
+```bash
+kubectl exec -n forgejo deploy/forgejo -c forgejo -- \
+  su-exec git forgejo admin user create \
+  --admin --username mawi --password YOUR_PASSWORD --email you@yourdomain.com
+```
 
-curl https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install_update_linux.sh | bash
+## Azure ACME (TLS certificates)
 
-~/.local/bin/
-echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
-source ~/.bashrc
+1. `az account list -o table`
+2. `az group list -o table`
+3. `az network dns zone list -o table`
+4. `az ad sp create-for-rbac --name traefik-acme --role "DNS Zone Contributor" --scopes /subscriptions/<sub-id>/resourceGroups/<rg>/providers/Microsoft.Network/dnszones/<domain>`
+
+The output gives you `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`, and `AZURE_TENANT_ID`.
+
+## Tea CLI (git client)
+
+```bash
+tea login add --name myserver --url https://git.yourdomain.com --token YOUR_TOKEN
+tea login default myserver
+tea repo create --name my-project --private
+```
+
+See [docker/docs/git-client-setup.md](docker/docs/git-client-setup.md).

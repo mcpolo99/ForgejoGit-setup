@@ -1,0 +1,91 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: forgejo-backup
+  namespace: forgejo
+spec:
+  schedule: "0 3 * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: backup
+              image: alpine:3
+              env:
+                - name: POSTGRES_HOST
+                  value: postgres
+                - name: POSTGRES_DB
+                  valueFrom:
+                    secretKeyRef:
+                      name: forgejo-secrets
+                      key: POSTGRES_DB
+                - name: POSTGRES_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: forgejo-secrets
+                      key: POSTGRES_USER
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: forgejo-secrets
+                      key: POSTGRES_PASSWORD
+                - name: BACKUP_KEEP_DAYS
+                  value: "30"
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  apk add --no-cache postgresql17-client
+                  TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                  BACKUP_DIR="/backups/${TIMESTAMP}"
+                  mkdir -p "${BACKUP_DIR}"
+
+                  echo "[$(date)] Dumping database..."
+                  pg_dump -h "${POSTGRES_HOST}" -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" \
+                    --clean --if-exists --no-owner | gzip > "${BACKUP_DIR}/database.sql.gz"
+
+                  echo "[$(date)] Backing up Forgejo data..."
+                  tar czf "${BACKUP_DIR}/forgejo-data.tar.gz" \
+                    -C /data/forgejo --exclude='log' --exclude='sessions' --exclude='indexers' .
+
+                  cat > "${BACKUP_DIR}/backup.info" <<BEOF
+                  timestamp=${TIMESTAMP}
+                  date=$(date -Iseconds)
+                  postgres_db=${POSTGRES_DB}
+                  BEOF
+
+                  echo "[$(date)] Cleaning backups older than ${BACKUP_KEEP_DAYS} days..."
+                  find /backups -maxdepth 1 -type d -mtime +${BACKUP_KEEP_DAYS} -not -path /backups \
+                    -exec rm -rf {} \;
+
+                  echo "[$(date)] Backup complete."
+              volumeMounts:
+                - name: forgejo-data
+                  mountPath: /data/forgejo
+                  readOnly: true
+                - name: backups
+                  mountPath: /backups
+          volumes:
+            - name: forgejo-data
+              persistentVolumeClaim:
+                claimName: forgejo-data
+            - name: backups
+              persistentVolumeClaim:
+                claimName: forgejo-backups
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: forgejo-backups
+  namespace: forgejo
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

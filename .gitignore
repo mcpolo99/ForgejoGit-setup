@@ -1,7 +1,8 @@
-.env
-data/
-backups/
-.temp
-traefik/acme.json
-traefik/traefik.yml
-traefik/dynamic.yml
+**/.env
+**/data/
+**/backups/
+**/.temp
+**/traefik/acme.json
+**/traefik/traefik.yml
+**/traefik/dynamic.yml
+k8s/secrets.yml
