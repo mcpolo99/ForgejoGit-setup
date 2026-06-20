@@ -15,9 +15,12 @@ else
 fi
 
 echo "Loading config from ${ENV_FILE}..."
-set -a
-eval "$(grep -v '^#' "${ENV_FILE}" | grep -v '^$' | grep -v '^UID=' | grep -v '^GID=')"
-set +a
+while IFS='=' read -r key value; do
+  case "$key" in
+    \#*|""|UID|GID) continue ;;
+    *) export "$key=$value" ;;
+  esac
+done < "${ENV_FILE}"
 
 # 1. Create namespace
 echo "Creating namespace..."
