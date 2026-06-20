@@ -16,7 +16,7 @@ fi
 
 echo "Loading config from ${ENV_FILE}..."
 set -a
-. "${ENV_FILE}"
+eval "$(grep -v '^#' "${ENV_FILE}" | grep -v '^$' | grep -v '^UID=' | grep -v '^GID=')"
 set +a
 
 # 1. Create namespace
