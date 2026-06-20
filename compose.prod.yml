@@ -1,0 +1,25 @@
+services:
+
+  traefik:
+    network_mode: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
+
+    environment:
+      AZURE_CLIENT_ID: ${AZURE_CLIENT_ID}
+      AZURE_CLIENT_SECRET: ${AZURE_CLIENT_SECRET}
+      AZURE_TENANT_ID: ${AZURE_TENANT_ID}
+      AZURE_SUBSCRIPTION_ID: ${AZURE_SUBSCRIPTION_ID}
+      AZURE_RESOURCE_GROUP: ${AZURE_RESOURCE_GROUP}
+      AZURE_ZONE_NAME: ${AZURE_ZONE_NAME}
+
+
+  forgejo:
+    environment:
+      FORGEJO__server__ROOT_URL: https://${HOSTNAME}/
+
+    ports:
+      - "127.0.0.1:3000:3000"
+      - "${SSH_PORT}:22"

@@ -1,0 +1,113 @@
+services:
+
+  traefik:
+    image: traefik:v3.5
+    container_name: traefik
+    restart: unless-stopped
+
+    ports:
+      - "80:80"
+      - "443:443"
+
+    volumes:
+      - ./traefik:/letsencrypt
+
+    networks:
+      - proxy
+
+
+  postgres:
+    image: postgres:17
+    container_name: forgejo-db
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+
+    networks:
+      - proxy
+
+
+  forgejo:
+    image: codeberg.org/forgejo/forgejo:12
+    container_name: forgejo
+    restart: unless-stopped
+
+    depends_on:
+      - postgres
+
+    environment:
+      USER_UID: ${UID}
+      USER_GID: ${GID}
+
+      FORGEJO__database__DB_TYPE: postgres
+      FORGEJO__database__HOST: forgejo-db:5432
+      FORGEJO__database__NAME: ${POSTGRES_DB}
+      FORGEJO__database__USER: ${POSTGRES_USER}
+      FORGEJO__database__PASSWD: ${POSTGRES_PASSWORD}
+
+      FORGEJO__server__DOMAIN: ${HOSTNAME}
+      FORGEJO__server__ROOT_URL: ${ROOT_URL}
+      FORGEJO__server__SSH_DOMAIN: ${HOSTNAME}
+
+      FORGEJO__service__DISABLE_REGISTRATION: ${FORGEJO_DISABLE_REGISTRATION}
+      FORGEJO__service__REQUIRE_SIGNIN_VIEW: ${FORGEJO_REQUIRE_SIGNIN}
+      FORGEJO__service__DEFAULT_USER_VISIBILITY: ${FORGEJO_DEFAULT_USER_VISIBILITY}
+      FORGEJO__service__DEFAULT_ORG_VISIBILITY: ${FORGEJO_DEFAULT_ORG_VISIBILITY}
+      FORGEJO__service__EXPLORE_PAGING_DEFAULT_SORT: newest
+
+      FORGEJO__repository__DEFAULT_PRIVATE: ${FORGEJO_DEFAULT_REPO_PRIVATE}
+      FORGEJO__repository__DISABLE_STARS: false
+
+      FORGEJO__openid__ENABLE_OPENID_SIGNIN: false
+      FORGEJO__openid__ENABLE_OPENID_SIGNUP: false
+
+    volumes:
+      - ./data/forgejo:/data
+
+    networks:
+      - proxy
+
+
+  backup:
+    image: alpine:3
+    container_name: forgejo-backup
+    restart: unless-stopped
+
+    depends_on:
+      - postgres
+      - forgejo
+
+    environment:
+      POSTGRES_HOST: forgejo-db
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS}
+      BACKUP_CRON: ${BACKUP_CRON}
+
+    volumes:
+      - ./data/forgejo:/data/forgejo:ro
+      - ./backups:/backups
+      - ./scripts/backup.sh:/backup.sh:ro
+
+    networks:
+      - proxy
+
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        apk add --no-cache postgresql17-client
+        echo "$${BACKUP_CRON} /bin/sh /backup.sh" > /etc/crontabs/root
+        crond -f -l 2
+
+
+networks:
+  proxy:
+    name: proxy

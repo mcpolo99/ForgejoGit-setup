@@ -1,0 +1,7 @@
+.env
+data/
+backups/
+.temp
+traefik/acme.json
+traefik/traefik.yml
+traefik/dynamic.yml

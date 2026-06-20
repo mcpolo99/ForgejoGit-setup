@@ -1,0 +1,23 @@
+tls:
+  stores:
+    default:
+      defaultGeneratedCert:
+        resolver: le
+        domain:
+          main: "git.yourdomain.com"
+
+http:
+  routers:
+    forgejo:
+      rule: "Host(`git.yourdomain.com`)"
+      entryPoints:
+        - websecure
+      service: forgejo
+      tls:
+        certResolver: le
+
+  services:
+    forgejo:
+      loadBalancer:
+        servers:
+          - url: "http://forgejo:3000"
