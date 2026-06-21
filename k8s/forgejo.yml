@@ -69,6 +69,11 @@ spec:
                 configMapKeyRef:
                   name: forgejo-config
                   key: HOSTNAME
+            - name: FORGEJO__server__SSH_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: forgejo-config
+                  key: SSH_PORT
             - name: FORGEJO__service__DISABLE_REGISTRATION
               value: "true"
             - name: FORGEJO__service__REQUIRE_SIGNIN_VIEW
