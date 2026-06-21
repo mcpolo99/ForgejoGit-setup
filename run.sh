@@ -19,6 +19,9 @@ exec > >(tee -a "${LOG_FILE}") 2>&1
 echo ""
 echo "=== run.sh started at $(date -Iseconds) ==="
 
+# Ensure all scripts are executable
+chmod +x "${SCRIPT_DIR}"/scripts/*.sh "${SCRIPT_DIR}"/scripts/dns/*.sh "${SCRIPT_DIR}"/scripts/uninstall/*.sh "${SCRIPT_DIR}"/uninstall.sh 2>/dev/null || true
+
 # --- Helpers ---
 
 detect_os() {
