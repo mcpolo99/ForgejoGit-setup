@@ -55,6 +55,24 @@ generate_manifests() {
   sed -i "s/__AZURE_ZONE_NAME__/${AZURE_ZONE_NAME}/g" cert-manager.yml
 }
 
+# --- Fix DNS search domain (prevents wildcard DNS misresolution) ---
+
+fix_dns_search() {
+  if grep -q "search.*${AZURE_ZONE_NAME}" /etc/resolv.conf 2>/dev/null; then
+    echo "Fixing DNS search domain (removing ${AZURE_ZONE_NAME})..."
+    sudo sed -i "s/search.*${AZURE_ZONE_NAME}/search/" /etc/resolv.conf
+
+    # Make permanent via NetworkManager
+    if [ -d /etc/NetworkManager/conf.d ]; then
+      echo -e "[connection]\nipv4.dns-search=" | sudo tee /etc/NetworkManager/conf.d/no-search-domain.conf > /dev/null
+    fi
+
+    # Restart CoreDNS to pick up change
+    kubectl rollout restart deploy/coredns -n kube-system 2>/dev/null || true
+    sleep 5
+  fi
+}
+
 # --- Apply core resources (no external exposure) ---
 
 apply_core() {
@@ -116,6 +134,7 @@ install_cert_manager() {
 case "${MODE}" in
   local)
     echo "Deploying Forgejo locally for ${HOSTNAME}..."
+    fix_dns_search
     apply_core
 
     echo ""
