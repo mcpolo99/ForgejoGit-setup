@@ -75,8 +75,14 @@ spec:
                   name: forgejo-config
                   key: SSH_PORT
             - name: FORGEJO__service__DISABLE_REGISTRATION
-              value: "true"
+              value: "false"
             - name: FORGEJO__service__REQUIRE_SIGNIN_VIEW
+              value: "true"
+            - name: FORGEJO__service__REGISTER_MANUAL_CONFIRM
+              value: "true"
+            - name: FORGEJO__service__ALLOW_ONLY_EXTERNAL_REGISTRATION
+              value: "true"
+            - name: FORGEJO__service__ENABLE_CAPTCHA
               value: "true"
             - name: FORGEJO__service__DEFAULT_USER_VISIBILITY
               value: private
