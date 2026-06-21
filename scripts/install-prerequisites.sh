@@ -2,6 +2,7 @@
 set -e
 
 # Installs prerequisites for Docker or Kubernetes deployment.
+# Logs appended to run.log in repo root.
 # Detects OS, architecture, and package manager automatically.
 # Usage: ./scripts/install-prerequisites.sh <docker|k8s>
 

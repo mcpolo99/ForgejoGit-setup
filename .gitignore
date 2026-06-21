@@ -9,3 +9,4 @@ k8s/secrets.yml
 k8s/ingress.yml
 k8s/cert-manager.yml
 config.yml
+run.log

@@ -11,6 +11,13 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONFIG_FILE="${SCRIPT_DIR}/config.yml"
+LOG_FILE="${SCRIPT_DIR}/run.log"
+
+# --- Logging ---
+
+exec > >(tee -a "${LOG_FILE}") 2>&1
+echo ""
+echo "=== run.sh started at $(date -Iseconds) ==="
 
 # --- Helpers ---
 
