@@ -78,7 +78,15 @@ spec:
             hostedZoneName: ${AZURE_ZONE_NAME}
 EOF
 
-# 6. Deploy everything
+# 6. Create scripts ConfigMap from shared scripts
+echo "Creating scripts ConfigMap..."
+kubectl create configmap forgejo-scripts \
+  --namespace forgejo \
+  --from-file=backup.sh=../scripts/backup.sh \
+  --from-file=restore.sh=../scripts/restore.sh \
+  --dry-run=client -o yaml | kubectl apply -f -
+
+# 7. Deploy everything
 echo "Deploying Postgres..."
 kubectl apply -f postgres.yml
 

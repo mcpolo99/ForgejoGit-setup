@@ -1,0 +1,75 @@
+# Usage:
+#   Restore latest backup:
+#     kubectl apply -f restore-job.yml
+#
+#   Restore specific backup:
+#     kubectl apply -f - <<EOF
+#     ... (copy this file and change BACKUP_NAME value)
+#     EOF
+#
+#   Watch progress:
+#     kubectl logs -n forgejo -f job/forgejo-restore
+#
+#   Clean up after restore:
+#     kubectl delete job forgejo-restore -n forgejo
+#
+#   Restart Forgejo after restore:
+#     kubectl rollout restart deploy/forgejo -n forgejo
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: forgejo-restore
+  namespace: forgejo
+spec:
+  ttlSecondsAfterFinished: 600
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: restore
+          image: alpine:3
+          env:
+            - name: POSTGRES_HOST
+              value: postgres
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: forgejo-secrets
+                  key: POSTGRES_DB
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: forgejo-secrets
+                  key: POSTGRES_USER
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: forgejo-secrets
+                  key: POSTGRES_PASSWORD
+            - name: BACKUP_NAME
+              value: ""
+          command:
+            - /bin/sh
+            - -c
+            - |
+              apk add --no-cache postgresql17-client
+              /bin/sh /scripts/restore.sh ${BACKUP_NAME}
+          volumeMounts:
+            - name: forgejo-data
+              mountPath: /data/forgejo
+            - name: backups
+              mountPath: /backups
+            - name: scripts
+              mountPath: /scripts
+              readOnly: true
+      volumes:
+        - name: forgejo-data
+          persistentVolumeClaim:
+            claimName: forgejo-data
+        - name: backups
+          persistentVolumeClaim:
+            claimName: forgejo-backups
+        - name: scripts
+          configMap:
+            name: forgejo-scripts

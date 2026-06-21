@@ -4,6 +4,10 @@ set -e
 # Usage: ./scripts/restore.sh [backup_folder]
 # Example: ./scripts/restore.sh 20260620_030000
 # If no argument given, uses the latest backup.
+#
+# Works with both Docker Compose and Kubernetes.
+# Docker:  docker compose run --rm backup sh /scripts/restore.sh
+# K8s:     kubectl apply -f k8s/restore-job.yml
 
 BACKUP_NAME="${1}"
 
@@ -23,9 +27,13 @@ echo ""
 echo "=== RESTORE FROM: ${BACKUP_DIR} ==="
 cat "${BACKUP_DIR}/backup.info"
 echo ""
-echo "This will OVERWRITE the current database and Forgejo data."
-echo "Press Ctrl+C within 10 seconds to cancel..."
-sleep 10
+
+# Only wait for confirmation in interactive mode
+if [ -t 0 ]; then
+  echo "This will OVERWRITE the current database and Forgejo data."
+  echo "Press Ctrl+C within 10 seconds to cancel..."
+  sleep 10
+fi
 
 # 1. Restore database
 echo "[$(date)] Restoring database..."
@@ -38,5 +46,4 @@ cd /data/forgejo
 tar xzf "${BACKUP_DIR}/forgejo-data.tar.gz"
 
 echo ""
-echo "[$(date)] Restore complete. Restart Forgejo to apply:"
-echo "  docker compose restart forgejo"
+echo "[$(date)] Restore complete. Restart Forgejo to apply."

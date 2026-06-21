@@ -94,7 +94,7 @@ services:
     volumes:
       - ./data/forgejo:/data/forgejo:ro
       - ./backups:/backups
-      - ./scripts/backup.sh:/backup.sh:ro
+      - ../scripts/backup.sh:/backup.sh:ro
 
     networks:
       - proxy

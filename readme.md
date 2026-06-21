@@ -18,7 +18,7 @@ docker compose -f compose.yml -f compose.dev.yml up -d
 docker compose -f compose.yml -f compose.prod.yml up -d
 ```
 
-See [docker/docs/](docker/docs/) for detailed setup guides.
+See [docs/](docs/) for detailed setup guides.
 
 ## Kubernetes (K3s)
 
@@ -57,4 +57,4 @@ tea login default myserver
 tea repo create --name my-project --private
 ```
 
-See [docker/docs/git-client-setup.md](docker/docs/git-client-setup.md).
+See [docs/git-client-setup.md](docs/git-client-setup.md).
