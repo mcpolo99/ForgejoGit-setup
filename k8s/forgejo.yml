@@ -55,11 +55,20 @@ spec:
                   name: forgejo-secrets
                   key: POSTGRES_PASSWORD
             - name: FORGEJO__server__DOMAIN
-              value: git.yourdomain.com
+              valueFrom:
+                configMapKeyRef:
+                  name: forgejo-config
+                  key: HOSTNAME
             - name: FORGEJO__server__ROOT_URL
-              value: https://git.yourdomain.com/
+              valueFrom:
+                configMapKeyRef:
+                  name: forgejo-config
+                  key: ROOT_URL
             - name: FORGEJO__server__SSH_DOMAIN
-              value: git.yourdomain.com
+              valueFrom:
+                configMapKeyRef:
+                  name: forgejo-config
+                  key: HOSTNAME
             - name: FORGEJO__service__DISABLE_REGISTRATION
               value: "true"
             - name: FORGEJO__service__REQUIRE_SIGNIN_VIEW

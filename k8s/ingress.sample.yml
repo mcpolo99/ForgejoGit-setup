@@ -8,13 +8,14 @@ metadata:
     traefik.ingress.kubernetes.io/router.tls: "true"
     traefik.ingress.kubernetes.io/router.middlewares: forgejo-security-headers@kubernetescrd
     cert-manager.io/cluster-issuer: letsencrypt-prod
+    # Placeholders replaced by setup.sh from .env
 spec:
   tls:
     - hosts:
-        - git.yourdomain.com
+        - __HOSTNAME__
       secretName: forgejo-tls
   rules:
-    - host: git.yourdomain.com
+    - host: __HOSTNAME__
       http:
         paths:
           - path: /
@@ -36,5 +37,5 @@ spec:
     app: forgejo
   ports:
     - name: ssh
-      port: 2222
+      port: __SSH_PORT__
       targetPort: 22

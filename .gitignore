@@ -6,3 +6,6 @@
 **/traefik/traefik.yml
 **/traefik/dynamic.yml
 k8s/secrets.yml
+k8s/ingress.yml
+k8s/cert-manager.yml
+config.yml
