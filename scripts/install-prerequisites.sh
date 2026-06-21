@@ -98,14 +98,35 @@ install_tea() {
     *) echo "WARNING: Unknown arch '${ARCH}' for Tea CLI, trying amd64."; TEA_ARCH="amd64" ;;
   esac
 
-  TEA_URL="https://gitea.com/gitea/tea/releases/download/v0.14.1/tea-0.14.1-linux-${TEA_ARCH}"
+  TEA_VERSION="0.14.1"
+  TEA_URL="https://gitea.com/gitea/tea/releases/download/v${TEA_VERSION}/tea-${TEA_VERSION}-linux-${TEA_ARCH}"
+  TEA_SHA_URL="${TEA_URL}.sha256"
   TEA_BIN="/usr/local/bin/tea"
+  TEA_TMP="/tmp/tea-download"
 
+  # Download binary and checksum
+  curl -sL -o "${TEA_TMP}" "${TEA_URL}"
+  EXPECTED_SHA=$(curl -sL "${TEA_SHA_URL}" | awk '{print $1}')
+  ACTUAL_SHA=$(sha256sum "${TEA_TMP}" | awk '{print $1}')
+
+  if [ -z "${EXPECTED_SHA}" ]; then
+    echo "WARNING: Could not fetch checksum — skipping verification."
+  elif [ "${EXPECTED_SHA}" != "${ACTUAL_SHA}" ]; then
+    echo "ERROR: Checksum mismatch for Tea CLI!"
+    echo "  Expected: ${EXPECTED_SHA}"
+    echo "  Got:      ${ACTUAL_SHA}"
+    rm -f "${TEA_TMP}"
+    exit 1
+  else
+    echo "Checksum verified."
+  fi
+
+  # Install
   if [ "$(id -u)" -eq 0 ]; then
-    curl -sL -o "${TEA_BIN}" "${TEA_URL}"
+    mv "${TEA_TMP}" "${TEA_BIN}"
     chmod +x "${TEA_BIN}"
   else
-    sudo curl -sL -o "${TEA_BIN}" "${TEA_URL}"
+    sudo mv "${TEA_TMP}" "${TEA_BIN}"
     sudo chmod +x "${TEA_BIN}"
   fi
 
