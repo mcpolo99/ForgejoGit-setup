@@ -86,7 +86,11 @@ kubectl create configmap forgejo-scripts \
   --from-file=restore.sh=../scripts/restore.sh \
   --dry-run=client -o yaml | kubectl apply -f -
 
-# 7. Deploy everything
+# 7. Apply TLS hardening
+echo "Applying TLS hardening..."
+kubectl apply -f tls-hardening.yml
+
+# 8. Deploy everything
 echo "Deploying Postgres..."
 kubectl apply -f postgres.yml
 
