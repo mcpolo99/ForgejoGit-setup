@@ -119,6 +119,11 @@ case "${MODE}" in
     apply_core
 
     echo ""
+    echo "Waiting for pods to be ready..."
+    kubectl wait --for=condition=Ready pod -l app=postgres -n forgejo --timeout=120s
+    kubectl wait --for=condition=Ready pod -l app=forgejo -n forgejo --timeout=120s
+
+    echo ""
     echo "Starting port-forward to localhost:3000..."
     echo "Press Ctrl+C to stop port-forward after setup is complete."
     kubectl port-forward -n forgejo svc/forgejo 3000:3000
