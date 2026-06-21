@@ -182,7 +182,12 @@ echo "Deployment: ${DEPLOYMENT}"
 # Install prerequisites (Linux only)
 if [ "${PLATFORM}" = "linux" ]; then
   echo ""
-  printf "Install prerequisites (docker/k3s/tea)? [Y/n]: " && read -r INSTALL_PREREQS
+  if [ "${DEPLOYMENT}" = "k8s" ]; then
+    PREREQ_LIST="k3s/tea"
+  else
+    PREREQ_LIST="docker/tea"
+  fi
+  printf "Install prerequisites (${PREREQ_LIST})? [Y/n]: " && read -r INSTALL_PREREQS
   case "${INSTALL_PREREQS}" in
     n|N) echo "Skipping prerequisite installation." ;;
     *) "${SCRIPT_DIR}/scripts/install-prerequisites.sh" "${DEPLOYMENT}" ;;
