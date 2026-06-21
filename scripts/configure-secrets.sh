@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
 # Interactive or manual secret configuration.
@@ -33,7 +33,7 @@ echo "=== Secret Configuration ==="
 echo ""
 echo "1) Enter values interactively"
 echo "2) Edit the config file manually"
-printf "Choice [1/2]: " && read -r INPUT_MODE
+printf "Choice [1/2]: " && read -er INPUT_MODE
 
 case "${INPUT_MODE}" in
   2) manual_mode=true ;;
@@ -55,7 +55,7 @@ if [ "${manual_mode}" = true ]; then
     echo "  ${TARGET}"
     echo ""
     if [ -n "${EDITOR}" ]; then
-      printf "Open in editor now? [Y/n]: " && read -r OPEN_EDITOR
+      printf "Open in editor now? [Y/n]: " && read -er OPEN_EDITOR
       case "${OPEN_EDITOR}" in
         n|N) ;;
         *) ${EDITOR} "${TARGET}" ;;
@@ -73,7 +73,7 @@ if [ "${manual_mode}" = true ]; then
     echo "  ${TARGET}"
     echo ""
     if [ -n "${EDITOR}" ]; then
-      printf "Open in editor now? [Y/n]: " && read -r OPEN_EDITOR
+      printf "Open in editor now? [Y/n]: " && read -er OPEN_EDITOR
       case "${OPEN_EDITOR}" in
         n|N) ;;
         *) ${EDITOR} "${TARGET}" ;;
@@ -81,7 +81,7 @@ if [ "${manual_mode}" = true ]; then
     fi
   fi
   echo ""
-  printf "Press Enter when done editing..." && read -r _
+  printf "Press Enter when done editing..." && read -er _
   return 0 2>/dev/null || exit 0
 fi
 
@@ -89,15 +89,15 @@ fi
 
 echo ""
 echo "=== Server Settings ==="
-printf "Domain (e.g. git.yourdomain.com): " && read -r HOSTNAME
-printf "SSH port [2222]: " && read -r SSH_PORT
+printf "Domain (e.g. git.yourdomain.com): " && read -er HOSTNAME
+printf "SSH port [2222]: " && read -er SSH_PORT
 SSH_PORT="${SSH_PORT:-2222}"
 
 echo ""
 echo "=== Database ==="
-printf "Postgres database name [forgejo]: " && read -r POSTGRES_DB
+printf "Postgres database name [forgejo]: " && read -er POSTGRES_DB
 POSTGRES_DB="${POSTGRES_DB:-forgejo}"
-printf "Postgres user [forgejo]: " && read -r POSTGRES_USER
+printf "Postgres user [forgejo]: " && read -er POSTGRES_USER
 POSTGRES_USER="${POSTGRES_USER:-forgejo}"
 
 echo ""
@@ -107,7 +107,7 @@ echo "Password: ${POSTGRES_PASSWORD}"
 
 echo ""
 echo "=== ACME / Let's Encrypt ==="
-printf "Email for Let's Encrypt: " && read -r ACME_EMAIL
+printf "Email for Let's Encrypt: " && read -er ACME_EMAIL
 
 # DNS provider credentials
 dns_prompt_credentials

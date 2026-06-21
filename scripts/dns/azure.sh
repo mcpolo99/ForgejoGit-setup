@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Azure DNS provider — prompts for credentials and returns values.
 # Sourced by configure-secrets.sh
 
@@ -15,12 +15,12 @@ dns_prompt_credentials() {
   echo "    --scopes /subscriptions/<sub-id>/resourceGroups/<rg>/providers/Microsoft.Network/dnszones/<domain>"
   echo ""
 
-  printf "Azure Client ID (appId): " && read -r AZURE_CLIENT_ID
-  printf "Azure Client Secret (password): " && read -r AZURE_CLIENT_SECRET
-  printf "Azure Tenant ID: " && read -r AZURE_TENANT_ID
-  printf "Azure Subscription ID: " && read -r AZURE_SUBSCRIPTION_ID
-  printf "Azure Resource Group: " && read -r AZURE_RESOURCE_GROUP
-  printf "Azure DNS Zone Name (e.g. yourdomain.com): " && read -r AZURE_ZONE_NAME
+  printf "Azure Client ID (appId): " && read -er AZURE_CLIENT_ID
+  printf "Azure Client Secret (password): " && read -er AZURE_CLIENT_SECRET
+  printf "Azure Tenant ID: " && read -er AZURE_TENANT_ID
+  printf "Azure Subscription ID: " && read -er AZURE_SUBSCRIPTION_ID
+  printf "Azure Resource Group: " && read -er AZURE_RESOURCE_GROUP
+  printf "Azure DNS Zone Name (e.g. yourdomain.com): " && read -er AZURE_ZONE_NAME
 
   export AZURE_CLIENT_ID AZURE_CLIENT_SECRET AZURE_TENANT_ID
   export AZURE_SUBSCRIPTION_ID AZURE_RESOURCE_GROUP AZURE_ZONE_NAME

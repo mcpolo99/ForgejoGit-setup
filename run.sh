@@ -141,7 +141,7 @@ if read_config; then
     print_access_instructions 3000
     echo ""
     printf "Press Enter when you have completed the setup wizard..."
-    read -r _
+    read -er _
     kill ${LOCAL_PID} 2>/dev/null || true
     wait ${LOCAL_PID} 2>/dev/null || true
 
@@ -172,7 +172,7 @@ else
   echo "Select deployment type:"
   echo "  1) Docker Compose"
   echo "  2) Kubernetes (K3s)"
-  printf "Choice [1/2]: " && read -r DEPLOY_CHOICE
+  printf "Choice [1/2]: " && read -er DEPLOY_CHOICE
   case "${DEPLOY_CHOICE}" in
     2) DEPLOYMENT="k8s" ;;
     *) DEPLOYMENT="docker" ;;
@@ -190,7 +190,7 @@ if [ "${PLATFORM}" = "linux" ]; then
   else
     PREREQ_LIST="docker/tea"
   fi
-  printf "Install prerequisites (${PREREQ_LIST})? [Y/n]: " && read -r INSTALL_PREREQS
+  printf "Install prerequisites (${PREREQ_LIST})? [Y/n]: " && read -er INSTALL_PREREQS
   case "${INSTALL_PREREQS}" in
     n|N) echo "Skipping prerequisite installation." ;;
     *) "${SCRIPT_DIR}/scripts/install-prerequisites.sh" "${DEPLOYMENT}" ;;
@@ -209,7 +209,7 @@ for p in ${PROVIDERS}; do
   echo "  ${i}) ${p}"
   i=$((i + 1))
 done
-printf "Choice [1]: " && read -r DNS_CHOICE
+printf "Choice [1]: " && read -er DNS_CHOICE
 DNS_PROVIDER=$(echo "${PROVIDERS}" | sed -n "${DNS_CHOICE:-1}p")
 echo "DNS provider: ${DNS_PROVIDER}"
 
@@ -233,7 +233,7 @@ print_access_instructions 3000
 
 echo ""
 printf "Press Enter when you have completed the setup wizard..."
-read -r _
+read -er _
 
 kill ${LOCAL_PID} 2>/dev/null || true
 wait ${LOCAL_PID} 2>/dev/null || true

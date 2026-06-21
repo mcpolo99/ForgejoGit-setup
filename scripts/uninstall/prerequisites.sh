@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
 # Uninstall prerequisites (Docker/K3s/Tea/cert-manager).
@@ -28,7 +28,7 @@ echo ""
 # --- Tea CLI ---
 
 if cmd_exists tea; then
-  printf "Uninstall Tea CLI? [y/N]: " && read -r REMOVE_TEA
+  printf "Uninstall Tea CLI? [y/N]: " && read -er REMOVE_TEA
   case "${REMOVE_TEA}" in
     y|Y)
       if [ "${PLATFORM}" = "linux" ]; then
@@ -45,7 +45,7 @@ fi
 # --- cert-manager (K8s only) ---
 
 if cmd_exists kubectl && kubectl get namespace cert-manager > /dev/null 2>&1; then
-  printf "Uninstall cert-manager? [y/N]: " && read -r REMOVE_CERTMGR
+  printf "Uninstall cert-manager? [y/N]: " && read -er REMOVE_CERTMGR
   case "${REMOVE_CERTMGR}" in
     y|Y)
       echo "Removing cert-manager..."
@@ -58,7 +58,7 @@ fi
 # --- K3s ---
 
 if [ "${PLATFORM}" = "linux" ] && [ -f /usr/local/bin/k3s-uninstall.sh ]; then
-  printf "Uninstall K3s? This removes ALL Kubernetes data. [y/N]: " && read -r REMOVE_K3S
+  printf "Uninstall K3s? This removes ALL Kubernetes data. [y/N]: " && read -er REMOVE_K3S
   case "${REMOVE_K3S}" in
     y|Y)
       echo "Uninstalling K3s..."
@@ -71,7 +71,7 @@ fi
 # --- Docker ---
 
 if cmd_exists docker; then
-  printf "Uninstall Docker? [y/N]: " && read -r REMOVE_DOCKER
+  printf "Uninstall Docker? [y/N]: " && read -er REMOVE_DOCKER
   case "${REMOVE_DOCKER}" in
     y|Y)
       if [ "${PLATFORM}" = "linux" ]; then
@@ -98,7 +98,7 @@ if cmd_exists docker; then
         esac
 
         # Remove Docker data
-        printf "Also remove all Docker data (/var/lib/docker)? [y/N]: " && read -r REMOVE_DOCKER_DATA
+        printf "Also remove all Docker data (/var/lib/docker)? [y/N]: " && read -er REMOVE_DOCKER_DATA
         case "${REMOVE_DOCKER_DATA}" in
           y|Y) sudo rm -rf /var/lib/docker /var/lib/containerd ;;
         esac

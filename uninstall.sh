@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
 # Forgejo Self-Hosted Git Server — Uninstall Script
@@ -26,7 +26,7 @@ if [ -z "${DEPLOYMENT}" ]; then
   echo "No config.yml found. What deployment type do you want to uninstall?"
   echo "  1) Docker Compose"
   echo "  2) Kubernetes (K3s)"
-  printf "Choice [1/2]: " && read -r DEPLOY_CHOICE
+  printf "Choice [1/2]: " && read -er DEPLOY_CHOICE
   case "${DEPLOY_CHOICE}" in
     2) DEPLOYMENT="k8s" ;;
     *) DEPLOYMENT="docker" ;;
@@ -63,7 +63,7 @@ echo "  1) Safe  — backup first, remove deployment, keep backups + config"
 echo "  2) Clean — backup first, remove deployment + data + config"
 echo "  3) Nuke  — no backup, remove absolutely everything"
 echo ""
-printf "Choice [1/2/3]: " && read -r MODE_CHOICE
+printf "Choice [1/2/3]: " && read -er MODE_CHOICE
 
 case "${MODE_CHOICE}" in
   2) MODE="clean" ;;
@@ -78,13 +78,13 @@ if [ "${MODE}" = "nuke" ]; then
   echo "WARNING: This will permanently delete ALL data, backups, and config."
   echo "         There is NO recovery after this."
   echo ""
-  printf "Type 'NUKE' to confirm: " && read -r CONFIRM
+  printf "Type 'NUKE' to confirm: " && read -er CONFIRM
   if [ "${CONFIRM}" != "NUKE" ]; then
     echo "Aborted."
     exit 1
   fi
 else
-  printf "Proceed with ${MODE} uninstall? [y/N]: " && read -r CONFIRM
+  printf "Proceed with ${MODE} uninstall? [y/N]: " && read -er CONFIRM
   case "${CONFIRM}" in
     y|Y) ;;
     *) echo "Aborted."; exit 1 ;;
@@ -106,7 +106,7 @@ fi
 # --- Ask about prerequisites ---
 
 echo ""
-printf "Also uninstall prerequisites (Docker/K3s/Tea CLI)? [y/N]: " && read -r REMOVE_PREREQS
+printf "Also uninstall prerequisites (Docker/K3s/Tea CLI)? [y/N]: " && read -er REMOVE_PREREQS
 case "${REMOVE_PREREQS}" in
   y|Y) "${SCRIPT_DIR}/scripts/uninstall/prerequisites.sh" ;;
 esac
